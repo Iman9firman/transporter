@@ -2,12 +2,10 @@ package com.transporter.Service;
 
 import com.transporter.DAO.TransportDAO;
 import com.transporter.Entity.Transport;
-import com.transporter.Model.RequestResponse;
+import com.transporter.ModelResponse.RequestResponse;
 import com.transporter.Repository.TransportRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;

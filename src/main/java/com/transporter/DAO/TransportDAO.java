@@ -9,4 +9,5 @@ public interface TransportDAO {
     int archiveData();
     String findRandData();
     Integer verifyData(String origin, String to, String msg);
+    String previousDate();
 }

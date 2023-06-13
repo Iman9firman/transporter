@@ -54,7 +54,6 @@ public class TransportDAOImpl implements TransportDAO {
     @Override
     public int archiveData() {
         String tableName = previousDate();
-
         // Fetch data from the original table
         String selectQuery = "SELECT * FROM transport";
         List<Map<String, Object>> dataToArchive = jdbcTemplate.queryForList(selectQuery);
@@ -64,17 +63,19 @@ public class TransportDAOImpl implements TransportDAO {
         for (Map<String, Object> row : dataToArchive) {
             jdbcTemplate.update(insertQuery, row.get("msisdn"), row.get("sendto"), row.get("keyword"), row.get("status"), row.get("created_at"), row.get("updated_at"));
         }
-
         // Delete the archived data from the original table
         String deleteQuery = "DELETE FROM transport";
         jdbcTemplate.update(deleteQuery);
+
         return 0;
     }
 
     @Override
     public String findRandData() {
         String query = "SELECT msisdn FROM msisdn ORDER BY RAND() LIMIT 1";
-        return jdbcTemplate.queryForObject(query, String.class);
+        String result = jdbcTemplate.queryForObject(query, String.class);
+//        jdbcTemplate.execute("DELETE FROM msisdn where msisdn="+result);
+        return result;
     }
 
     @Override
