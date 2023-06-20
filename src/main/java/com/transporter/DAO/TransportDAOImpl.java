@@ -1,18 +1,25 @@
 package com.transporter.DAO;
 
 import com.transporter.Entity.MSISDN_Ref;
+import com.transporter.Entity.Transport;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Repository;
 
 @Repository
+@Slf4j
 public class TransportDAOImpl implements TransportDAO {
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -85,7 +92,7 @@ public class TransportDAOImpl implements TransportDAO {
             Integer result =  jdbcTemplate.queryForObject(query, Integer.class, origin, to, msg);
             return result;
         }catch (Exception e){
-            System.out.println("daoImpl verify failed cause : " + e.getMessage());
+            log.info("Report Failed cause : " + e.getMessage());
             return 0;
         }
     }
@@ -99,4 +106,59 @@ public class TransportDAOImpl implements TransportDAO {
         String tableName = tableNamePrefix + yesteday.format(formatter);
         return tableName;
     }
+
+    @Override
+    public Integer cekStatus(String msisdn) {
+        Integer status = 0;
+        String query = "SELECT * FROM transport where msisdn=?";
+        String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        Boolean oneMinute = false;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        List<Transport> listTransport = jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transport.class), msisdn);
+        if (listTransport.isEmpty() || listTransport == null) {
+            status = 0;
+        } else {
+            Transport transport = listTransport.get(listTransport.size() - 1);
+            status = transport.getStatus();
+            System.out.println(transport.toString());
+            Date date = null;
+            try {
+                date = dateFormat.parse(transport.getCreated_at());
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+
+            oneMinute = oneMinute(date);
+            if (status == 100 && oneMinute){
+                transport.setStatus(200);
+                transport.setUpdated_at(dateNow);
+                jdbcTemplate.update("UPDATE transport SET status=?, updated_at=?  WHERE id=?",
+                        new Object[] { transport.getStatus(), transport.getUpdated_at(), transport.getId() });
+                status = 200;
+                System.out.println("failed "+transport.toString());
+            }
+        }
+        return status;
+    }
+
+
+    public Boolean oneMinute(Date currentDate ){
+        // Create a calendar instance
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+
+        // Add 1 minute to the current date
+        calendar.add(Calendar.MINUTE, 1);
+        Date dateAfter = calendar.getTime();
+        currentDate = new Date();
+//        System.out.println(currentDate + " || " + dateAfter);
+        // Compare the two dates
+        if (currentDate.before(dateAfter)) {
+            return false;
+        }else {
+            return true;
+        }
+    }
+
 }

@@ -13,12 +13,13 @@ public class ArchiveScheduler {
     @Autowired
     private TransportDAO dao;
 
-    @Scheduled(fixedDelay = 50000)
-//    @Scheduled(cron = "0 0 0 * * *")
-    public void schedulerHari(){
+//    @Scheduled(fixedDelay = 5000)
+    @Scheduled(cron = "0 0 0 * * *")
+    public void schedulerHariArchive(){
         String yesterday = dao.previousDate();
         log.info("Archive Scheduler activated | Archive Data into : " + yesterday);
         dao.saveTableArchive();
         dao.archiveData();
     }
+
 }

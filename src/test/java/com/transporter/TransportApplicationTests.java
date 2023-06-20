@@ -1,15 +1,22 @@
 package com.transporter;
 
 import com.transporter.DAO.TransportDAO;
+import com.transporter.Entity.Transport;
 import com.transporter.Service.TransportService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 @SpringBootTest
@@ -70,4 +77,20 @@ class TransportApplicationTests {
 		String tableName = tableNamePrefix + yesteday.format(formatter);
 		return tableName;
 	}
+
+	@Autowired
+	private RestTemplate restTemplate;
+
+	@Test
+	void contextLoads2() {
+		String fooResourceUrl = "http://localhost:8080/conn";
+		ResponseEntity<String> response  = restTemplate.getForEntity(fooResourceUrl , String.class);
+		System.out.println(response.getBody());
+
+	}
+	@Test
+	void contextLoads3() throws ParseException {
+		dao.cekStatus("628111390310");
+	}
+
 }

@@ -4,6 +4,7 @@ import com.transporter.DAO.TransportDAO;
 import com.transporter.Entity.Transport;
 import com.transporter.ModelResponse.RequestResponse;
 import com.transporter.Repository.TransportRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Random;
 
 @Service
+@Slf4j
 public class TransportService {
     @Autowired
     TransportDAO dao;
@@ -29,7 +31,7 @@ public class TransportService {
         Transport transport = new Transport();
         transport.setMsisdn(num);
         transport.setKeyword(randCode());
-        transport.setStatus(1);
+        transport.setStatus(100);
         transport.setCreated_at(date);
         transport.setKeyword(key);
         transport.setSendto(to);
@@ -40,11 +42,20 @@ public class TransportService {
     }
 
     public Integer getStatus(String num){
-        List<Transport> listTransport = repository.findByMsisdn(num);
-        Transport transport = listTransport.get(listTransport.size()-1);
-        Integer status = transport.getStatus();
+        Integer status = 0;
 
+        List<Transport> listTransport = repository.findByMsisdn(num);
+        if (listTransport.isEmpty() || listTransport==null) {
+            status = 0;
+        }else {
+            Transport transport = listTransport.get(listTransport.size()-1);
+            status = transport.getStatus();
+        }
         return status;
+    }
+
+    public Integer getStatus2(String num){
+        return dao.cekStatus(num);
     }
 
     public String randCode() {
@@ -67,7 +78,7 @@ public class TransportService {
         calendar.add(Calendar.MINUTE, 1);
         Date dateAfter = calendar.getTime();
         currentDate = new Date();
-        System.out.println(currentDate + " || " + dateAfter);
+//        System.out.println(currentDate + " || " + dateAfter);
         // Compare the two dates
         if (currentDate.before(dateAfter)) {
             return false;

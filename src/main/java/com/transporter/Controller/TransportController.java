@@ -26,8 +26,9 @@ public class TransportController {
         String num = request.getMsisdn();
         try {
             //Jadi to itu nomor random dari database || msg itu generate random 16 string
-
             RequestResponse response = service.saveMsisdn(num);
+            log.info("Number " + num + " has been registered");
+
             return new ResponseEntity<>(response,HttpStatus.ACCEPTED);
         }catch (Exception e){
             log.info("Request Number "+ num +" error, cause: " + e.getMessage());
@@ -35,32 +36,28 @@ public class TransportController {
         }
     }
 
-    public HashMap<String, Date> numStat = new HashMap<String, Date>();
+    /*
+        status :
+        1 = default
+        2 = failed
+    */
     @GetMapping("/status")
     public ResponseEntity<?> getStatusScheduler(@RequestParam("msisdn") String num){
         try {
             ApiStatus status = new ApiStatus();
-            Integer response = service.getStatus(num);
-            // Get the current date and time
-            Date currentDate = new Date();
+            Integer response = service.getStatus2(num);
 
-            if (numStat.get(num) == null) {
-                numStat.put(num, currentDate);
-            }else {
-                currentDate = numStat.get(num);
-                System.out.println("udah ada " + currentDate);
-            }
-            Boolean oneMinute = service.oneMinute(currentDate);
-
-            if (response==1){
-                if (oneMinute){
-                    numStat.remove(num);
-                    status.setResult("failed");
-                    return new ResponseEntity<>(status,HttpStatus.ACCEPTED);
-                }
+//            log.info("msisdn " + num + " oneMinute " + oneMinute);
+            if (response == 0){
+                status.setResult("msisdn not found");
+                return new ResponseEntity<>(status,HttpStatus.BAD_REQUEST);
+            }if (response==100){
                 status.setResult("pending");
                 return new ResponseEntity<>(status,HttpStatus.ACCEPTED);
-            }else {
+            } else if (response == 200){
+                status.setResult("failed");
+                return new ResponseEntity<>(status,HttpStatus.ACCEPTED);
+            } else {
                 status.setResult("success");
                 return new ResponseEntity<>(status,HttpStatus.ACCEPTED);
             }
@@ -80,10 +77,9 @@ public class TransportController {
         try {
             //search semua param ke database yg status nya 1 kalo ada return 2 success
             int result =  service.verifyData(origin, to, msg);
-            System.out.println("report result :: "+result);
-
             responseString = (result==1) ? "failed" : "success";
             if (result==0) responseString="Cannot find data";
+
             response.setResult(responseString);
             return new ResponseEntity<>(response,HttpStatus.ACCEPTED);
         }catch (Exception e){
