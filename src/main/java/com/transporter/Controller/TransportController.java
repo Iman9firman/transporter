@@ -38,8 +38,9 @@ public class TransportController {
 
     /*
         status :
-        1 = default
-        2 = failed
+          1 = default | new
+        100 = success
+        200 = failed
     */
     @GetMapping("/status")
     public ResponseEntity<?> getStatusScheduler(@RequestParam("msisdn") String num){
@@ -51,7 +52,7 @@ public class TransportController {
             if (response == 0){
                 status.setResult("msisdn not found");
                 return new ResponseEntity<>(status,HttpStatus.BAD_REQUEST);
-            }if (response==100){
+            }if (response==1){
                 status.setResult("pending");
                 return new ResponseEntity<>(status,HttpStatus.ACCEPTED);
             } else if (response == 200){
@@ -75,11 +76,12 @@ public class TransportController {
         String to = report.getTo();
         String msg = report.getMsg();
         try {
-            //search semua param ke database yg status nya 1 kalo ada return 2 success
+            //search semua param ke database yg status nya 1 kalo ada return 100 success
             int result =  service.verifyData(origin, to, msg);
-            responseString = (result==1) ? "failed" : "success";
+            responseString = (result==100) ? "success" : "failed";
             if (result==0) responseString="Cannot find data";
 
+            log.info("Request Report "+ origin + ", " + responseString);
             response.setResult(responseString);
             return new ResponseEntity<>(response,HttpStatus.ACCEPTED);
         }catch (Exception e){

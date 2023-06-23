@@ -31,7 +31,7 @@ public class TransportService {
         Transport transport = new Transport();
         transport.setMsisdn(num);
         transport.setKeyword(randCode());
-        transport.setStatus(100);
+        transport.setStatus(1);
         transport.setCreated_at(date);
         transport.setKeyword(key);
         transport.setSendto(to);

@@ -88,8 +88,18 @@ public class TransportDAOImpl implements TransportDAO {
     @Override
     public Integer verifyData(String origin, String to, String msg) {
         try {
-            String query = "SELECT status FROM transport WHERE msisdn=? AND sendto=? AND keyword=? ";
-            Integer result =  jdbcTemplate.queryForObject(query, Integer.class, origin, to, msg);
+            String query = "SELECT * FROM transport WHERE msisdn=? AND sendto=? AND keyword=? ";
+            Transport transport =  jdbcTemplate.queryForObject(query, BeanPropertyRowMapper.newInstance(Transport.class), origin, to, msg);
+            Integer result = transport.getStatus();
+            if (transport!=null){
+                String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+                transport.setStatus(100);
+                transport.setUpdated_at(dateNow);
+                result = 100;
+
+                jdbcTemplate.update("UPDATE transport SET status=?, updated_at=?  WHERE id=?",
+                        new Object[] { transport.getStatus(), transport.getUpdated_at(), transport.getId() });
+            }
             return result;
         }catch (Exception e){
             log.info("Report Failed cause : " + e.getMessage());
@@ -116,12 +126,13 @@ public class TransportDAOImpl implements TransportDAO {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         List<Transport> listTransport = jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transport.class), msisdn);
+//        System.out.println(listTransport.toString());
         if (listTransport.isEmpty() || listTransport == null) {
             status = 0;
         } else {
-            Transport transport = listTransport.get(listTransport.size() - 1);
+            Transport transport = listTransport.get(0);
             status = transport.getStatus();
-            System.out.println(transport.toString());
+//            System.out.println(transport.toString());
             Date date = null;
             try {
                 date = dateFormat.parse(transport.getCreated_at());
@@ -130,13 +141,13 @@ public class TransportDAOImpl implements TransportDAO {
             }
 
             oneMinute = oneMinute(date);
-            if (status == 100 && oneMinute){
+            if (status == 1 && oneMinute){
                 transport.setStatus(200);
                 transport.setUpdated_at(dateNow);
                 jdbcTemplate.update("UPDATE transport SET status=?, updated_at=?  WHERE id=?",
                         new Object[] { transport.getStatus(), transport.getUpdated_at(), transport.getId() });
                 status = 200;
-                System.out.println("failed "+transport.toString());
+//                System.out.println("failed "+transport.toString());
             }
         }
         return status;
