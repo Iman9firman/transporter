@@ -1,6 +1,7 @@
 package com.transporter.DAO;
 
 import com.transporter.Entity.MSISDN_Ref;
+import com.transporter.Entity.Report;
 import com.transporter.Entity.Transport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,9 @@ public class TransportDAOImpl implements TransportDAO {
                 transport.setUpdated_at(dateNow);
                 result = 100;
 
+                Report report = new Report(origin,to, msg, dateNow);
+                saveReport(report);
+
                 jdbcTemplate.update("UPDATE transport SET status=?, updated_at=?  WHERE id=?",
                         new Object[] { transport.getStatus(), transport.getUpdated_at(), transport.getId() });
             }
@@ -107,6 +111,10 @@ public class TransportDAOImpl implements TransportDAO {
         }
     }
 
+    public int saveReport(Report report) {
+        return jdbcTemplate.update("INSERT INTO check_report (msisdn, sendto, msg, created_at) VALUES(?,?,?,?)",
+                new Object[] { report.getMsisdn(), report.getSendto(), report.getKeyword(), report.getCreated_at() });
+    }
 
     public String previousDate(){
         LocalDate yesteday = LocalDate.now().minusDays(1);
@@ -118,19 +126,19 @@ public class TransportDAOImpl implements TransportDAO {
     }
 
     @Override
-    public Integer cekStatus(String msisdn) {
+    public Integer cekStatus(String msisdn, String to, String msg) {
         Integer status = 0;
-        String query = "SELECT * FROM transport where msisdn=?";
+        String query = "SELECT * FROM transport where msisdn=? AND sendto=? AND keyword=?";
         String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         Boolean oneMinute = false;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        List<Transport> listTransport = jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transport.class), msisdn);
+        List<Transport> listTransport = jdbcTemplate.query(query, BeanPropertyRowMapper.newInstance(Transport.class), msisdn, to, msg);
 //        System.out.println(listTransport.toString());
         if (listTransport.isEmpty() || listTransport == null) {
             status = 0;
         } else {
-            Transport transport = listTransport.get(0);
+            Transport transport = listTransport.get(listTransport.size()-1);
             status = transport.getStatus();
 //            System.out.println(transport.toString());
             Date date = null;

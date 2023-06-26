@@ -13,5 +13,5 @@ public interface TransportDAO {
     String findRandData();
     Integer verifyData(String origin, String to, String msg);
     String previousDate();
-    Integer cekStatus(String msisdn);
+    Integer cekStatus(String msisdn, String to, String msg);
 }

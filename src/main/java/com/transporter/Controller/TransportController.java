@@ -43,10 +43,11 @@ public class TransportController {
         200 = failed
     */
     @GetMapping("/status")
-    public ResponseEntity<?> getStatusScheduler(@RequestParam("msisdn") String num){
+    public ResponseEntity<?> getStatusScheduler(@RequestParam("msisdn") String num,
+                                                @RequestParam("to") String to, @RequestParam("msg") String msg){
         try {
             ApiStatus status = new ApiStatus();
-            Integer response = service.getStatus2(num);
+            Integer response = service.getStatus2(num, to, msg);
 
 //            log.info("msisdn " + num + " oneMinute " + oneMinute);
             if (response == 0){
@@ -76,7 +77,7 @@ public class TransportController {
         String to = report.getTo();
         String msg = report.getMsg();
         try {
-            //search semua param ke database yg status nya 1 kalo ada return 100 success
+            //search semua param ke database kalo ada return 100 success
             int result =  service.verifyData(origin, to, msg);
             responseString = (result==100) ? "success" : "failed";
             if (result==0) responseString="Cannot find data";

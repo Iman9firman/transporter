@@ -1,6 +1,7 @@
 package com.transporter.Service;
 
 import com.transporter.DAO.TransportDAO;
+import com.transporter.Entity.Report;
 import com.transporter.Entity.Transport;
 import com.transporter.ModelResponse.RequestResponse;
 import com.transporter.Repository.TransportRepository;
@@ -21,7 +22,7 @@ public class TransportService {
     @Autowired
     TransportDAO dao;
     @Autowired
-    TransportRepository repository;
+    TransportRepository transportRepository;
 
     public RequestResponse saveMsisdn(String num){
         String key = randCode();
@@ -35,7 +36,7 @@ public class TransportService {
         transport.setCreated_at(date);
         transport.setKeyword(key);
         transport.setSendto(to);
-        repository.save(transport);
+        transportRepository.save(transport);
 
         RequestResponse response = new RequestResponse(to, key);
         return response;
@@ -44,7 +45,7 @@ public class TransportService {
     public Integer getStatus(String num){
         Integer status = 0;
 
-        List<Transport> listTransport = repository.findByMsisdn(num);
+        List<Transport> listTransport = transportRepository.findByMsisdn(num);
         if (listTransport.isEmpty() || listTransport==null) {
             status = 0;
         }else {
@@ -54,8 +55,8 @@ public class TransportService {
         return status;
     }
 
-    public Integer getStatus2(String num){
-        return dao.cekStatus(num);
+    public Integer getStatus2(String num, String to, String msg){
+        return dao.cekStatus(num, to, msg);
     }
 
     public String randCode() {
