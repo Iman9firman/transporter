@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+
+    <title>Fragments</title>
+
+    <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/fontawesome/all.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/style.css}" />
+    <script type="text/javascript" th:src="@{/webjars/jquery/jquery.min.js}" ></script>
+    <script type="text/javascript" th:src="@{/webjars/bootstrap/js/bootstrap.min.js}" ></script>
+
+</head>
+<body>
+
+    <a th:fragment="page_link(moduleURL,pageNum,label)" class="page-link"
+       th:href="@{${moduleURL} + ${pageNum} + '?sortField=' + ${sortField} + '&sortDir=' +${sortDir} } ">
+        [[${label}]]
+    </a>
+
+    <div th:fragment="navigation()" th:remove="tag">
+        <form th:action="@{/logout}" method="post" th:hidden="true" name="logoutForm">
+            <input type="submit" />
+        </form>
+        <div class="logout">
+            <h5 th:inline="text">Welcome [[${#httpServletRequest.remoteUser}]] ||  <a th:href="@{/logout}" class="link-danger" id="logoutLink">Logout</a> </h5>
+        </div>
+
+        <nav aria-label="breadcrumb" >
+            <ol class="breadcrumb bg-white">
+                    <li class="breadcrumb-item"><a href="/home">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/home">Import</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div th:fragment="sortDir(page)" th:remove="tag">
+        <a th:if="${sortField !=  'id'}" class="text-white"
+           th:href="@{${page} + ${currentPage} + '?sortField=id' + '&sortDir=' +${sortDir}}">
+            ID
+        </a>
+        <a th:if="${sortField ==  'id'}" class="text-primary"
+           th:href="@{${page} + ${currentPage} + '?sortField=id'+'&sortDir=' + ${reverseSortDirString}}">
+            ID
+        </a>
+
+        <span th:if="${sortField == 'id'}"
+              th:class="${sortDir == 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'}">
+		                        </span>
+    </div>
+
+    <div th:fragment="pagination(moduleURL)" th:remove="tag">
+        <div data-th-silent="true" th:if="${totalPages > 1}")>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, 1,'First')" ></a>
+                    </li>
+                    <li th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}" >
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${currentPage - 1},'Previous')" ></a>
+                    </li>
+
+                    <li th:if="${currentPage!=1 && currentPage!=2}" th:class="page-item"
+                        th:with="i = ${currentPage - 2}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${i},${i})" ></a>
+                    </li>
+
+                    <li th:if="${currentPage!=1 }" th:class="page-item"
+                        th:with="i = ${currentPage - 1}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${i},${i})" ></a>
+                    </li>
+
+                    <li th:class="${currentPage != i ? 'page-item' : 'page-item active'}"
+                        th:with="i = ${currentPage}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${i},${i})" ></a>
+                    </li>
+
+                    <li th:if="${currentPage!=totalPages}" th:class="page-item"
+                        th:with="i = ${currentPage + 1}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${i},${i})" ></a>
+                    </li>
+
+                    <li th:if="${currentPage!=totalPages && currentPage!=totalPages-1}" th:class="page-item"
+                        th:with="i = ${currentPage + 2}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${i},${i})" ></a>
+                    </li>
+
+                    <li th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}" >
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${currentPage} + 1,'Next')" ></a>
+                    </li>
+
+                    <li th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}">
+                        <a th:replace="fragments :: page_link(${moduleURL}, ${totalPages},'Last')" ></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+</body>
+</html>

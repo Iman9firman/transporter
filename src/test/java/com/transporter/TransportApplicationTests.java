@@ -1,7 +1,11 @@
 package com.transporter;
 
+import com.transporter.DAO.ReportDao;
 import com.transporter.DAO.TransportDAO;
+import com.transporter.Entity.CMSReport;
+import com.transporter.Entity.Report;
 import com.transporter.Entity.Transport;
+import com.transporter.Model.ReportCMS;
 import com.transporter.Service.TransportService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
@@ -23,6 +27,8 @@ import java.util.Random;
 class TransportApplicationTests {
 	@Autowired
 	private TransportDAO dao;
+	@Autowired
+	private ReportDao reportDao;
 
 	@Autowired
 	private TransportService service;
@@ -90,7 +96,24 @@ class TransportApplicationTests {
 	}
 	@Test
 	void contextLoads3() throws ParseException {
-		dao.cekStatus("628111390310");
+		List<CMSReport> test = reportDao.findDistinct();
+		System.out.println(test.toString());
+
+		for (CMSReport temp : test) {
+			//            System.out.println("Sent Status :"+ temp.getSentStatus() + " || Count : " + temp.getCount()
+			//                    + " || date : " + temp.getDate());
+			String status = temp.getStatus() == null  ? "0" : temp.getStatus();
+
+			CMSReport result = new CMSReport();
+			result.setId(temp.getDate()+"#"+temp.getMsisdn()+"#"+status);
+			result.setMsisdn(temp.getMsisdn());
+			result.setSendto(temp.getSendto());
+			result.setDate(temp.getDate());
+			result.setStatus(status);
+			result.setCount(temp.getCount());
+
+			reportDao.saveCMSReport(result);
+		}
 	}
 
 }
