@@ -163,7 +163,7 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public List<ReportDetail> tesFindReportDetail(String table, String msisdn){
         String sql1 = "SELECT `status`, COUNT(`status`) AS COUNT\n" +
-                "FROM `transport"+ table +"` WHERE `msisdn` LIKE '%"+msisdn+"%'\n" +
+                "FROM `transport"+ table +"` WHERE `msisdn` LIKE '"+msisdn+"'\n" +
                 "GROUP BY `msisdn`, `status` ; ";
         return jdbcTemplate.query(sql1,BeanPropertyRowMapper.newInstance(ReportDetail.class));
     }
