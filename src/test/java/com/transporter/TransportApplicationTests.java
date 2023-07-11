@@ -3,11 +3,11 @@ package com.transporter;
 import com.transporter.DAO.ReportDao;
 import com.transporter.DAO.TransportDAO;
 import com.transporter.Entity.CMSReport;
-import com.transporter.Entity.Report;
-import com.transporter.Entity.Transport;
-import com.transporter.Model.ReportCMS;
+import com.transporter.Entity.ReportDetail;
+import com.transporter.Repository.ReportRepository;
 import com.transporter.Service.TransportService;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.Hibernate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,10 +16,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -30,6 +28,8 @@ class TransportApplicationTests {
 	@Autowired
 	private ReportDao reportDao;
 
+	@Autowired
+	private ReportRepository reportRepository;
 	@Autowired
 	private TransportService service;
 
@@ -96,7 +96,8 @@ class TransportApplicationTests {
 	}
 	@Test
 	void contextLoads3() throws ParseException {
-		List<CMSReport> test = reportDao.findDistinct();
+		String table = "_15062023";
+		List<CMSReport> test = reportDao.findDistinct(table);
 		System.out.println(test.toString());
 
 		for (CMSReport temp : test) {
@@ -114,6 +115,47 @@ class TransportApplicationTests {
 
 			reportDao.saveCMSReport(result);
 		}
+	}
+
+	@Test
+	void tesReportDetail(){
+		String table = "_12062023";
+		List<CMSReport> test = reportDao.findDistinct(table);
+		System.out.println(test.toString());
+
+		for (CMSReport temp : test) {
+			String status = temp.getStatus() == null  ? "0" : temp.getStatus();
+
+			CMSReport result = new CMSReport();
+			result.setId(temp.getDate()+"_"+temp.getMsisdn());
+			result.setMsisdn(temp.getMsisdn());
+			result.setSendto(temp.getSendto());
+			result.setDate(temp.getDate());
+			result.setStatus(status);
+			result.setCount(temp.getCount());
+
+//			table = "_" + temp.getMsisdn();
+			List<ReportDetail> reportDetails = reportDao.tesFindReportDetail(table, temp.getMsisdn());
+			for(ReportDetail rptDetails : reportDetails){
+				System.out.println(rptDetails.toString());
+				String statusDet = rptDetails.getStatus();
+				String count = rptDetails.getCount();
+				result.addReportDetail(statusDet, count);
+			}
+
+//			result.addReportDetail("tes", "123");
+
+			reportRepository.save(result);
+		}
+	}
+
+	@Test
+	void testDetails(){
+		CMSReport report = reportRepository.findById("2023-06-13#628111390310#1").get();
+//		System.out.println(report.toString());
+		Hibernate.initialize(report.getDetails().toString());  // Initialize the details collection
+
+		System.out.println("test" + report.getDetails().get(1).toString());
 	}
 
 }
