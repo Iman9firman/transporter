@@ -2,19 +2,21 @@ package com.transporter.Service;
 
 import com.transporter.DAO.ReportDao;
 import com.transporter.Entity.CMSReport;
+import com.transporter.Entity.ReportDetail;
 import com.transporter.Repository.ReportRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.*;
 
+@Slf4j
 @Service
 public class ReportService {
 
@@ -62,7 +64,7 @@ public class ReportService {
 
         int start = (page-1)*size;
         int end = Math.min((start + pageRequest.getPageSize()), allReportCMSs.size());
-        System.out.println("Showing Data from : " + start + " | " + end + " | of " + allReportCMSs.size());
+//        System.out.println("Showing Data from : " + start + " | " + end + " | of " + allReportCMSs.size());
         List<CMSReport> pageContent = allReportCMSs.subList(start, end);
 
         return new PageImpl<>(pageContent, pageRequest, allReportCMSs.size());
@@ -71,7 +73,6 @@ public class ReportService {
         return PageRequest.of(page-1, size);
     }
 
-//    @Cacheable("ReportCMSAll")
     public List<CMSReport> findAllReport(String keyword){
         List<CMSReport> dist = dao.findDistinctTable();
         if (keyword!= null){
@@ -81,22 +82,7 @@ public class ReportService {
         return dist;
     }
 
-
-    /*
-    @Caching(
-            evict = {
-                    @CacheEvict(value = {"ReportCMSAll", "ReportCMSPage"}, allEntries = true)},
-            put = {
-                    @CachePut(value = {"ReportCMSAll", "ReportCMSPage"})
-            }
-    )
-    public ReportCMS deleteUpdateCache(ReportCMS result){
-        return dao.saveReportCMS(result);
-    }
-    */
-    
-    public Map<String, Object> detailFilter( List<CMSReport> hasil){
-
+    public Map<String, Object> detailFilter( List<CMSReport> hasil, String date){
         Map<String, Object> map = new HashMap<>();
         
         HashSet<String> dates = new HashSet<>();
@@ -135,8 +121,11 @@ public class ReportService {
             }
         }
 
-//        System.out.println(hasil.size());
+        List<String> days = totalDay(date);
+        List<String> left = days.subList(dateList2.size(), days.size());
 
+        map.put("days", days);
+        map.put("lefts", left);
         map.put("listDetails", hasil);
         map.put("listDetailStatus", msisdn);
         map.put("listDetailDate", dateList);
@@ -145,4 +134,54 @@ public class ReportService {
 
         return map;
     }
+
+    public List<String> totalDay(String dateString){
+        String[] parts = dateString.split("-");
+        int year = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+
+        YearMonth yearMonth = YearMonth.of(year, month);
+        int totalDays = (int) yearMonth.lengthOfMonth();
+
+        List<String> dateList = new ArrayList<>();
+        for (int i = 1; i<=totalDays; i++){
+            dateList.add(String.valueOf(i));
+        }
+//        System.out.println("Total Day : "+totalDays + "|"+dateList.size());
+
+        return dateList;
+    }
+
+    public void reportDetail(String table){
+//       String table = "transport_15062023";
+        try {
+            dao.enabledGroupBy();
+            List<CMSReport> test = dao.findDistinct(table);
+
+            for (CMSReport temp : test) {
+                String status = temp.getStatus() == null  ? "0" : temp.getStatus();
+
+                CMSReport result = new CMSReport();
+                result.setId(temp.getDate()+"_"+temp.getMsisdn());
+                result.setMsisdn(temp.getMsisdn());
+                result.setSendto(temp.getSendto());
+                result.setDate(temp.getDate());
+                result.setStatus(status);
+                result.setCount(temp.getCount());
+
+//			table = "_" + temp.getMsisdn();
+                List<ReportDetail> reportDetails = dao.tesFindReportDetail(table, temp.getMsisdn());
+                for(ReportDetail rptDetails : reportDetails){
+                    String statusDet = rptDetails.getStatus();
+                    String count = rptDetails.getCount();
+                    result.addReportDetail(statusDet, count);
+                }
+
+                repo.save(result);
+            }
+        }catch (Exception e){
+            log.info("reportDetail failed " + e.getMessage());
+        }
+    }
+
 }

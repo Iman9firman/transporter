@@ -27,23 +27,28 @@ public class TransportDAOImpl implements TransportDAO {
 
     @Override
     public int saveTableArchive() {
-        String tableName = previousDate();
+        try {
+            String tableName = previousDate();
 
-        // Create the SQL statement for table creation
-        String createTableSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                "id INT PRIMARY KEY AUTO_INCREMENT, " +
-                "`msisdn` varchar(255) DEFAULT NULL, " +
-                "`sendto` varchar(20) DEFAULT NULL, " +
-                "`keyword` varchar(255) DEFAULT NULL, " +
-                "`status` int(11) DEFAULT NULL, " +
-                "`created_at` varchar(255) DEFAULT NULL, " +
-                "`updated_at` varchar(255) DEFAULT NULL " +
-                ")";
+            // Create the SQL statement for table creation
+            String createTableSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                    "id INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "`msisdn` varchar(255) DEFAULT NULL, " +
+                    "`sendto` varchar(20) DEFAULT NULL, " +
+                    "`keyword` varchar(255) DEFAULT NULL, " +
+                    "`status` int(11) DEFAULT NULL, " +
+                    "`created_at` varchar(255) DEFAULT NULL, " +
+                    "`updated_at` varchar(255) DEFAULT NULL " +
+                    ")";
 
-        // Execute the SQL statement
-        jdbcTemplate.execute(createTableSql);
+            // Execute the SQL statement
+            jdbcTemplate.execute(createTableSql);
 
-        return 0;
+            return 0;
+        }catch (Exception e){
+            log.info("saveTableArchive failed "+e.getMessage());
+            return 1;
+        }
     }
 
     @Override
@@ -61,21 +66,26 @@ public class TransportDAOImpl implements TransportDAO {
 
     @Override
     public int archiveData() {
-        String tableName = previousDate();
-        // Fetch data from the original table
-        String selectQuery = "SELECT * FROM transport";
-        List<Map<String, Object>> dataToArchive = jdbcTemplate.queryForList(selectQuery);
+        try {
+            String tableName = previousDate();
+            // Fetch data from the original table
+            String selectQuery = "SELECT * FROM transport";
+            List<Map<String, Object>> dataToArchive = jdbcTemplate.queryForList(selectQuery);
 
-        // Insert the data into the archive table
-        String insertQuery = "INSERT INTO "+ tableName +" (msisdn, sendto, keyword, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
-        for (Map<String, Object> row : dataToArchive) {
-            jdbcTemplate.update(insertQuery, row.get("msisdn"), row.get("sendto"), row.get("keyword"), row.get("status"), row.get("created_at"), row.get("updated_at"));
+            // Insert the data into the archive table
+            String insertQuery = "INSERT INTO "+ tableName +" (msisdn, sendto, keyword, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)";
+            for (Map<String, Object> row : dataToArchive) {
+                jdbcTemplate.update(insertQuery, row.get("msisdn"), row.get("sendto"), row.get("keyword"), row.get("status"), row.get("created_at"), row.get("updated_at"));
+            }
+            // Delete the archived data from the original table
+            String deleteQuery = "DELETE FROM transport";
+            jdbcTemplate.update(deleteQuery);
+
+            return 0;
+        }catch (Exception e){
+            log.info("archiveData failed " + e.getMessage());
+            return 1;
         }
-        // Delete the archived data from the original table
-        String deleteQuery = "DELETE FROM transport";
-        jdbcTemplate.update(deleteQuery);
-
-        return 0;
     }
 
     @Override

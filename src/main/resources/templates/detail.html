@@ -47,20 +47,15 @@
         <a th:href="@{${'/detail/'+date}}" class="btn btn-secondary">Clear</a>
     </form>
 
-    <div class="excel">
-        <a th:if="${keyword==null}" th:href="@{${'/report/export/excel/'+date}}" >Export to Excel</a>
-        <a th:if="${keyword!=null}" th:href="@{${'/report/export/excel/'+date+'?keyword='+keyword}}" >Export to Excel</a>
-    </div>
-
 
 <div class="details">
     <table class="table table-bordered table-hover table-striped table-responsive-xL">
             <thead class ="thead-dark">
             <tr>
-                <th width="8%">
+                <th width="5%">
                     MSISDN
                 </th>
-                <th th:each="hh : ${listDetailDate}">
+                <th th:each="hh : ${days}">
                     <span th:text="${hh}"> </span>
                 </th>
             </tr>
@@ -70,25 +65,23 @@
             <tr th:each="hh : ${listDetailStatus}">
                 <td th:text="${hh}"></td>
 
-                    <p th:each="date : ${listDetailDate2}" >
-
+                <p th:each="date, qq : ${listDetailDate2}" >
                     <td th:with="key=${date+'_'+hh}">
-                        <!-- <span th:text="${key}"> true </span>-->
-                        <!-- <span th:text="${counts}"> true </span>-->
-                        <!-- <span th:if="${date+hh == counts.keySet()}">True</span> -->
-<!--                         <span th:text="@{'/detail/'+${date}+'/'+${key}}">True</span>-->
-
-
-
-                    <a title="View Details Of This Product"
-                         th:href="@{'/detail/'+${date}+'/'+${key}}"
-                         class="link-detail"/>
+                        <a title="View Details Of This Product"
+                           th:href="@{'/detail/'+${date}+'/'+${key}}"
+                           class="link-detail"/>
 
                         <span th:if="${counts.get(key)<300}" th:text="${counts.get(key)}" class="text-danger">  </span>
                         <span th:if="${counts.get(key)==null}" th:text="${counts.get(key)}">  </span>
                         <span th:if="${counts.get(key)>300}" th:text="${counts.get(key)}" class="tgl"></span>
                     </td>
-                    </p>
+                </p>
+                <p th:each="left, qq : ${lefts}" >
+                    <td>
+                        <span>  </span>
+                    </td>
+                </p>
+
             </tr>
             </tbody>
        </table>

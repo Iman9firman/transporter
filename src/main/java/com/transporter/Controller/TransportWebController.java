@@ -7,15 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Controller
@@ -23,7 +20,6 @@ import java.util.*;
 public class TransportWebController {
     @Autowired
     private ReportDao dao;
-
     @Autowired
     private ReportService service;
 
@@ -62,7 +58,7 @@ public class TransportWebController {
     @GetMapping("/detail/{date}")
     public String pageDetail(Model map, @PathVariable("date")String date, @Param("keyword") String keyword) throws ParseException {
         List<CMSReport> hasil = dao.findTgl2(date, keyword);
-        Map<String, Object> attr = service.detailFilter(hasil);
+        Map<String, Object> attr = service.detailFilter(hasil, date);
 
         map.addAttribute("keyword", keyword);
         map.addAllAttributes(attr);
@@ -71,13 +67,10 @@ public class TransportWebController {
 
     @GetMapping("/detail/{date}/{id}")
     public String tesGetPage(Model map, @PathVariable("date") String date, @PathVariable("id") String id, RedirectAttributes ra) {
-        System.out.println("date: " + date);
-        System.out.println("id: " + id);
         CMSReport report = service.findByID(id);
-        System.out.println("qq>>"+report.getDetails().toString());
+//        System.out.println("qq>>"+report.getDetails().toString());
 
         map.addAttribute("report", report);
-
         return "report_detail_modal";
     }
 

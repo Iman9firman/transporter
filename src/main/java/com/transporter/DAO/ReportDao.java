@@ -15,5 +15,5 @@ public interface ReportDao {
     int saveCMSReport(CMSReport rpt);
     List<ReportDetail> tesFindReportDetail(String table, String msisdn);
     int tesSaveReportDetail(ReportDetail reportDetail, String id);
-
+    void enabledGroupBy();
 }

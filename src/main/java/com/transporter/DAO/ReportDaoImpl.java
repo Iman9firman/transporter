@@ -24,12 +24,12 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<CMSReport> findDistinct(String table) {
-//        String date = "_15062023";
+//        String date = "transport_15062023";
         String sql = "SELECT `msisdn`, `sendto`, DATE(created_at) AS date, `status`, COUNT(`status`) AS COUNT " +
-                    "FROM transport"+table+" \n" +
+                    "FROM "+table+" \n" +
                     "GROUP BY `msisdn`";
 
-        System.out.println(sql);
+//        System.out.println(sql);
         return jdbcTemplate.query(sql,BeanPropertyRowMapper.newInstance(CMSReport.class));
     }
     @Override
@@ -48,7 +48,7 @@ public class ReportDaoImpl implements ReportDao {
         List<ReportDetail> reportDetails = tesFindReportDetail("",rpt.getMsisdn());
         for(ReportDetail rptDetails : reportDetails){
 //            tesSaveReportDetail(rptDetails, rpt.getId());
-            System.out.println(rptDetails.toString());
+//            System.out.println(rptDetails.toString());
             String status = rptDetails.getStatus();
             String count = rptDetails.getCount();
             rpt.addReportDetail(status, count);
@@ -80,7 +80,7 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public List<ReportDetail> tesFindReportDetail(String table, String msisdn){
         String sql1 = "SELECT `status`, COUNT(`status`) AS COUNT\n" +
-                "FROM `transport"+ table +"` WHERE `msisdn` LIKE '"+msisdn+"'\n" +
+                "FROM `"+ table +"` WHERE `msisdn` LIKE '"+msisdn+"'\n" +
                 "GROUP BY `msisdn`, `status` ; ";
         return jdbcTemplate.query(sql1,BeanPropertyRowMapper.newInstance(ReportDetail.class));
     }
@@ -95,4 +95,9 @@ public class ReportDaoImpl implements ReportDao {
                 id
         });
     }
+
+    public void enabledGroupBy(){
+        jdbcTemplate.execute("SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
+    }
+
 }
