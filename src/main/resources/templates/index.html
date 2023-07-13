@@ -17,11 +17,6 @@
 <div class="container-fluid">
     <br>
     <div class="text-center">
-        <div class="logout">
-            <form th:action="@{/logout}" method="post" >
-                <input type="submit" value="Logout" class="btn btn-danger"/>
-            </form>
-        </div>
         <h1>CMS</h1>
     </div>
 
@@ -79,15 +74,33 @@
         </table>
     </div>
 
-    <div class="text-center m-1" th:if="${totalItems > 0}")>
-        <span>Showing Report # [[${startCount}]] to [[${endCount}]] of [[${totalItems}]]</span>
-    </div>
-    <div class="text-center m-1 " th:unless="${totalItems > 0} " >
-        <span>No Report Found</span>
-    </div>
+    <div class="row">
+        <div class="col">
+            <form class="form-inline" id="formPage" method="get" action="/home/">
 
-    <div th:if="${totalPages > 1}")>
-        <div th:replace="fragments :: pagination('/home/')"></div>
+                <input type="hidden" name="sortDir" id="sortDirInput" th:value="${sortDir}">
+                <input type="hidden" name="keyword" id="keywordInput" th:value="${keyword}">
+
+                Page  &nbsp;
+                <input type="text" th:value="${currentPage}" size="10" style="width:30px; height:20px" id="pageVal">
+                &nbsp;Of&nbsp;<span th:text="${totalPages}"></span> &nbsp;
+                <input type="submit" value="Search" id="submitSearch"/>
+            </form>
+
+        </div>
+
+        <div class="col">
+            <div style="margin-left: -5rem;" th:if="${totalItems > 0}")>
+                <span>Showing Report # [[${startCount}]] to [[${endCount}]] of [[${totalItems}]]</span>
+            </div>
+            <div style="margin-left: -5rem;" th:unless="${totalItems > 0} " >
+                <span>No Report Found</span>
+            </div>
+
+            <div th:if="${totalPages > 1}")>
+                <div th:replace="fragments :: pagination('/home/')"></div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -95,14 +108,31 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 
-
 	});
 
 	function clearFilter(){
 		window.location="[[@{/}]]";
 	}
 
+    const button = document.getElementById("submitSearch");
+    button.addEventListener("click", submitForm)
 
+    function submitForm(e) {
+      e.preventDefault();
+
+        const form = document.getElementById('formPage');
+        const pageVal = document.getElementById("pageVal").value;
+        const totalPages = [[${totalPages}]];
+        console.log(pageVal);
+
+
+        if(pageVal > totalPages){
+            alert('page does not exist');
+        }else{
+            form.action = form.action + pageVal;
+            form.submit();
+        }
+    }
 </script>
 </body>
 

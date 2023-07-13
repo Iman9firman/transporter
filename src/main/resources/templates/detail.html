@@ -40,7 +40,7 @@
 
     <form th:action="@{${'/detail/'+date}}" class="form-inline m-3" style="margin-bottom: -0.75rem" id="searchForm">
         Filter : &nbsp;
-        <input type="search" placeholder="Sent Status" name="keyword" th:value="${keyword}" class="form-control" required/>
+        <input type="search" placeholder="msisdn" name="keyword" th:value="${keyword}" class="form-control" required/>
         &nbsp;&nbsp;
         <input type="submit" value="Search" class="btn btn-primary" />
         &nbsp;&nbsp;
@@ -58,7 +58,7 @@
             <thead class ="thead-dark">
             <tr>
                 <th width="8%">
-                    Sent Status
+                    MSISDN
                 </th>
                 <th th:each="hh : ${listDetailDate}">
                     <span th:text="${hh}"> </span>

@@ -119,7 +119,7 @@ class TransportApplicationTests {
 
 	@Test
 	void tesReportDetail(){
-		String table = "_12062023";
+		String table = "_15062023";
 		List<CMSReport> test = reportDao.findDistinct(table);
 		System.out.println(test.toString());
 

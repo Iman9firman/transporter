@@ -42,7 +42,7 @@ public class ReportService {
         }
 
         for (String i : counts.keySet()) {
-//            System.out.println("key: " + i + " value: " + counts.get(i));
+//          System.out.println("key: " + i + " value: " + counts.get(i));
             CMSReport result = new CMSReport();
             result.setDate(i);
             result.setCount(String.valueOf(counts.get(i)));
@@ -60,16 +60,15 @@ public class ReportService {
         Pageable pageRequest = createPageRequestUsing(page, size);
         List<CMSReport> allReportCMSs = results;
 
-//        int start = (int) pageRequest.getOffset();
         int start = (page-1)*size;
         int end = Math.min((start + pageRequest.getPageSize()), allReportCMSs.size());
-
         System.out.println("Showing Data from : " + start + " | " + end + " | of " + allReportCMSs.size());
         List<CMSReport> pageContent = allReportCMSs.subList(start, end);
+
         return new PageImpl<>(pageContent, pageRequest, allReportCMSs.size());
     }
     private Pageable createPageRequestUsing(int page, int size) {
-        return PageRequest.of(page, size);
+        return PageRequest.of(page-1, size);
     }
 
 //    @Cacheable("ReportCMSAll")
@@ -136,7 +135,7 @@ public class ReportService {
             }
         }
 
-        System.out.println(hasil.size());
+//        System.out.println(hasil.size());
 
         map.put("listDetails", hasil);
         map.put("listDetailStatus", msisdn);

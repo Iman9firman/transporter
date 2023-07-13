@@ -44,8 +44,6 @@ public class TransportWebController {
         Page<CMSReport> resultPage = service.disp(resultAll, pageNum);
         List<CMSReport> results = resultPage.getContent();
 
-        System.out.println(results.toString());
-        System.out.println(results.size());
 
         map.addAttribute("listReports", results);
         map.addAttribute("keyword", keyword);
